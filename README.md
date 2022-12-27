@@ -14,9 +14,9 @@ Find example of the CSV file in the Example directory.
 
 * [CSV file](./Examples/csv_files/12U_AAA.csv)
 
-* [LaTeX file](./Examples/LateX/12U_AAA.tex)
+* [LaTeX file](./Examples/latex/12U_AAA.tex)
 
-* [PDF file](./Examples/LateX/12U_AAA.pdf)
+* [PDF file](./Examples/latex/12U_AAA.pdf)
 
 ## Create CSV Files Usage
 
