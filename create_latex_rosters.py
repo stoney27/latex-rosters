@@ -50,7 +50,7 @@ if not os.path.exists(template_file):
 csv_dir = os.path.abspath(csv_dir)
 
 # Create the LaTeX output directory if it doesn't exist
-latex_dir = 'LaTeX'
+latex_dir = 'latex'
 if not os.path.exists(latex_dir):
     os.makedirs(latex_dir)
 
