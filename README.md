@@ -13,11 +13,11 @@ In a latex directory, there will be a tex file for each roster file in the roste
 
 Find example of the CSV file in the Example directory.
 
-* [CSV file -- 12U_black.csv](./Examples/csv/12U_black.csv)
+* [CSV file -- 12U_black.csv](./Examples/csv/12U_Black.csv)
 
-* [LaTeX file -- 12U_black.tex](./Examples/latex/12U_black.tex)
+* [LaTeX file -- 12U_black.tex](./Examples/latex/12U_Black.tex)
 
-* [PDF file -- 12U_black.pdf](./Examples/latex/12U_black.pdf)
+* [PDF file -- 12U_black.pdf](./Examples/latex/12U_Black.pdf)
 
 ## Create CSV Files Usage
 
