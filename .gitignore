@@ -1,3 +1,8 @@
 latex
 csv
+latex_logfile.log
+*.aux
+*.log
+
+!Examples/csv
 !Examples/latex

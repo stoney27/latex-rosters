@@ -39,6 +39,10 @@ for sheet in wb:
                 f"Error: Required headers not found in sheet '{sheet.title}'")
             continue
 
+    # If sheet.title has a space in the name, replace it with an underscore
+    if ' ' in sheet.title:
+        sheet.title = sheet.title.replace(' ', '_')
+        
     # Create a CSV file for the sheet
     with open(f'csv/{sheet.title}.csv', 'w', newline='') as csv_file:
         # Create a CSV writer
