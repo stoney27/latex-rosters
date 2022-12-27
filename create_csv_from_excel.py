@@ -9,15 +9,15 @@ import openpyxl
 import os
 import sys
 
-# Create the "csv" directory if it doesn't exist
-if not os.path.exists("csv"):
-    os.makedirs("csv")
-
 # Get the filename from the command line
 if len(sys.argv) < 2:
     print("Usage: python export_excel_to_csv.py <filename>")
     sys.exit(1)
 filename = sys.argv[1]
+
+# Create the "csv" directory if it doesn't exist
+if not os.path.exists("csv"):
+    os.makedirs("csv")
 
 # Open the Excel file
 wb = openpyxl.load_workbook(filename)
