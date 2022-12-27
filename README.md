@@ -4,7 +4,8 @@ This script creates a LaTeX roster for a given CVS file.  It will make one roste
 
 ## Create Rosters Usage
 
-    ./create_rosters.sh roster_dir
+    ./create_rosters.sh roster_dir <LaTeX template file>
+    The path to the LaTeX template file is optional.  If not given, the default template file will be used.
 
 ### Rosters Output
 
