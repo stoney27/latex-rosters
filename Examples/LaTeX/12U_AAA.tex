@@ -1,0 +1,42 @@
+\documentclass{article}
+\usepackage{datatool}
+\usepackage[T1]{fontenc}
+\usepackage{fix-cm}
+\usepackage[margin=0.5in]{geometry}
+\usepackage[linewidth=1pt]{mdframed}
+
+\pagestyle{empty}
+\mdfsetup{skipabove=1pt,skipbelow=1pt}
+\mdfdefinestyle{FrameBox}{%
+    nobreak=true, % prevents page breaking
+    outerlinewidth=0.5pt,
+}
+
+% Refefine the mdframed environment to use the FrameBox style
+\newenvironment{playerframe}{
+    \begin{mdframed}[style=FrameBox]
+}{
+    \end{mdframed}
+}
+
+% Define the CSV file to be used, CSV FILE place holder will be replaced with the actual file name
+%
+% The CSV file must have the headers, Firstname,Lastname,Sweater,Team in that order.
+%
+\DTLloaddb{roster}{/usr/home/scott/src/latex-rosters/Examples/csv_files/12U_AAA.csv}
+
+\begin{document}
+    \begin{DTLenvforeach*}{roster}{\FirstName=Firstname,\LastName=Lastname,\Sweater=Sweater,\Team=Team}
+        \begin{playerframe}
+			\begin{minipage}[t][4.5cm]{18cm}
+				\vspace{12mm}
+				\sffamily \centering
+				\fontsize{36}{36} \selectfont \textbf{\FirstName} \hspace{.25mm} \textbf{\LastName} \hspace{5mm} \textbf{\Sweater}
+				\LARGE \vspace{10mm}
+		
+				\itshape\Team
+				
+			\end{minipage}
+		\end{playerframe}
+    \end{DTLenvforeach*}
+\end{document}

@@ -24,6 +24,18 @@ if len(sys.argv) < 2:
     print('Please provide the path to the CSV directory as a command line argument')
     sys.exit(1)
 
+# If the length of the command line argument is greater than 2, then find the
+# argument that has .tex in the name and use that as the template file
+if len(sys.argv) > 2:
+    for arg in sys.argv:
+        if arg.endswith('.tex'):
+            template_file = arg
+        else:
+            csv_dir = arg
+else:
+    # Get the CSV directory from the command line argument
+    csv_dir = sys.argv[1]
+                    
 # Check for the existence of pdflatex, liveTex should be installed
 if not os.path.exists(pdflatex_path):
     print('pdflatex not found at {}. Please install it and try again.'.format(pdflatex_path))
@@ -31,11 +43,8 @@ if not os.path.exists(pdflatex_path):
 
 # Check for the existence of the template file
 if not os.path.exists(template_file):
-    print('Template file {} not found. Please create it and try again.'.format(template_file))
+    print('Template file {} not found. Please create it and try again. Or pass in the path to the file.'.format(template_file))
     sys.exit(1)
-
-# Get the CSV directory from the command line argument
-csv_dir = sys.argv[1]
 
 # Get the fully qualified path to the CSV directory
 csv_dir = os.path.abspath(csv_dir)

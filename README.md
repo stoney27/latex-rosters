@@ -10,6 +10,14 @@ This script creates a LaTeX roster for a given CVS file.  It will make one roste
 
 In a latex directory, there will be a tex file for each roster file in the roster directory.  There will also be a PDF file for each roster file in the roster directory.
 
+Find example of the CSV file in the Example directory.
+
+* [CSV file](./Examples/csv_files/12U_AAA.csv)
+
+* [LaTeX file](./Examples/LateX/12U_AAA.tex)
+
+* [PDF file](./Examples/LateX/12U_AAA.pdf)
+
 ## Create CSV Files Usage
 
     ./create_csv_from_excel.py excel_file
