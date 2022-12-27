@@ -1,21 +1,30 @@
-# LaTeX Rosters creatioin script
+# LaTeX Rosters creation script
 
-This script is used to create a LaTeX roster for a given CVS files.  It will create one roster for each CVS file in the given roster directory.  It will then porcess the LateX files and create a PDF file for each roster.  These PDF files can then be printed and used for photos.
+This script creates a LaTeX roster for a given CVS file.  It will make one roster for each CVS file in the given roster directory.  It will then process the LateX files and create a PDF file for each roster.  These PDF files can then be printed and used for photos.
 
-## Usage
+## Create Rosters Usage
 
     ./create_rosters.sh roster_dir
 
-## Output
+### Rosters Output
 
-In a latex directory there will be a tex file for each roster file in the roster directory.  There will also be a PDF file for each roster file in the roster directory.
+In a latex directory, there will be a tex file for each roster file in the roster directory.  There will also be a PDF file for each roster file in the roster directory.
+
+## Create CSV Files Usage
+
+    ./create_csv_from_excel.py excel_file
+
+### CSV Output
+
+In a CSV directory, there will be a CSV file for each roster for each sheet in the excel file.
 
 ## Requirements
 
 * Python 3 installed
+* Python 3 modules installed: CSV, openpyxl
 * TeXLive installed
 * Path for pdflatex installed if not in the default path
-* Individual roster files in CVS format the roster directory
+* Individual roster files in CVS format in the roster directory
 * Roster files must include, First Name, Last Name, Sweater Number, and Team Name
 
 ## License
