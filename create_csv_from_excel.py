@@ -51,4 +51,7 @@ for sheet in wb:
         writer.writerow(headers)
         # Iterate through the rest of the rows in the sheet and write them to the CSV file
         for row in sheet.rows:
+            # If row has headers, skip it
+            if row[0].value in headers:
+                continue
             writer.writerow([cell.value for cell in row])
