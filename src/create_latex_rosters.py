@@ -15,9 +15,10 @@ import os
 import sys
 import subprocess
 
-# Template file with the CSV_FILE string to be replaced
-template_file = 'RosterTemplate.tex'
-pdflatex_path = '/Library/TeX/texbin/pdflatex'
+# Template file with the CSV_FILE string to be replaced read from Environment variables
+# if no env default to template_file = 'RosterTemplate.tex'
+template_file = os.environ['ROSTER_TEMPLATE', 'RosterTemplate.tex']
+pdflatex_path = os.environ['PDFLATEX_PATH', '/Library/TeX/texbin/pdflatex']
 
 # Check if a CSV directory was provided as a command line argument
 if len(sys.argv) < 2:
