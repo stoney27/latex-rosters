@@ -51,6 +51,7 @@ def test_check_sheet_titles():
     assert check_sheet_titles(sheet7) == False
 
 def test_fix_team_name():
+    assert fix_team_name('10UAAA') == '10U AAA'
     assert fix_team_name('11u AAA') == '11U AAA'
     assert fix_team_name('12u red') == '12U Red'
     assert fix_team_name('13Uaaa') == '13U AAA'
@@ -59,6 +60,10 @@ def test_fix_team_name():
     assert fix_team_name('14U BLACK') == '14U Black'
     assert fix_team_name('10U Blue') == '10U Blue'
     assert fix_team_name('11URED') == '11U Red'
+    assert fix_team_name('Team A') == 'Team A'
+    assert fix_team_name('Team B') == 'Team B'
+    assert fix_team_name('TEAM C') == 'Team C'
+    assert fix_team_name('TEAM DANCE') == 'Team Dance'
 
 
 def test_separate_first_last_name():

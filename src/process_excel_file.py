@@ -79,11 +79,14 @@ def fix_team_name(team_name):
     team_name = team_name.upper()
 
     # Make the team name has a space after <digit>U or <digit><digit>U
-    if re.match(r'\d+U\w+', team_name):
+    # if the name does not have a digit+U the camlcase the age group
+    if re.match(r'^\d+U\w+', team_name):
         team_name = team_name.replace('U', 'U ')
-    
-    # Camel case the team name after the space unless it is AAA
-    if team_name.find('AAA') == -1:
+    else:
+        (team_age_group, t_name) = team_name.split(' ', 1)
+        team_name = team_age_group.title() + ' ' + t_name
+
+    if team_name.split()[1] not in ['AAA']:
         (team_age_group, t_name) = team_name.split(' ', 1)
         team_name = team_age_group + ' ' + t_name.title()
 
@@ -120,6 +123,9 @@ def process_teams(workbook, sheet_name):
 
             # Split the full name into first and last name
             (first_name, last_name) = separate_first_last_name(full_name)
+
+        # Fix the team name
+        team = fix_team_name(team)
 
         # Add the player to the roster for their team
         if team not in rosters:
