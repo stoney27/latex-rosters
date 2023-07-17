@@ -1,6 +1,11 @@
 #!/usr/bin/env python3.9
 # -*- coding: utf-8 -*-
-
+#
+# File: export_csv_from_excel.py
+# Author: Scott Stonefield
+#
+# Read in an Excel file and export each sheet as a CSV file
+#
 import csv
 import openpyxl
 import os
@@ -142,26 +147,31 @@ def export_by_team(filename):
         if csv_file is not None:
             csv_file.close()  # close the last CSV file
 
-# Command line argument parsing
-parser = argparse.ArgumentParser(description='Export Excel file to CSV.')
-parser.add_argument('filename', help='Name of the Excel file to export.')
-parser.add_argument('--by-team', action='store_true', help='If set, export by team. Otherwise, export by workbook.')
+def main():
+    # Command line argument parsing
+    parser = argparse.ArgumentParser(description='Export Excel file to CSV.')
+    parser.add_argument('filename', help='Name of the Excel file to export.')
+    parser.add_argument('--by-team', action='store_true', help='If set, export by team. Otherwise, export by workbook.')
 
-args = parser.parse_args()
+    args = parser.parse_args()
 
-# Create the "csv" directory if it doesn't exist
-if not os.path.exists("csv"):
-    os.makedirs("csv")
+    # Create the "csv" directory if it doesn't exist
+    if not os.path.exists("csv"):
+        os.makedirs("csv")
 
-# Check if the Excel file exists
-if not os.path.exists(args.filename):
-    print(f"Error: File '{args.filename}' not found")
-    sys.exit(1)
+    # Check if the Excel file exists
+    if not os.path.exists(args.filename):
+        print(f"Error: File '{args.filename}' not found")
+        sys.exit(1)
 
-if args.by_team:
-    export_by_team(args.filename)
-else:
-    export_by_workbook(args.filename)
+    if args.by_team:
+        export_by_team(args.filename)
+    else:
+        export_by_workbook(args.filename)
+        
+    # Print total player count after processing all workbooks
+    print(f'\nTotal players: {player_count}')
     
-# Print total player count after processing all workbooks
-print(f'\nTotal players: {player_count}')
+if __name__ == '__main__':
+    main()
+

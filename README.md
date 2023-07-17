@@ -36,6 +36,14 @@ Find example of the CSV file in the Example directory.
 
 * [PDF file -- 12U_black.pdf](./Examples/latex/12U_Black.pdf)
 
+### Testing
+
+To test the script, use the following command:
+
+```bash
+pytest -v
+```
+
 ## csv_to_latex_pdf.py
 This script creates LaTeX files from a given CSV file directory and a LaTeX template file, then processes them into PDF files.
 
