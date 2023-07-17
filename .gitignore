@@ -3,6 +3,7 @@ csv
 latex_logfile.log
 *.aux
 *.log
+memory_mate
 
 !Examples/csv
 !Examples/latex

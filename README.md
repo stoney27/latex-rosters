@@ -1,15 +1,32 @@
-# LaTeX Rosters creation script
+# Python Excel to CSV and LaTeX PDF Roster Scripts
 
-This script creates a LaTeX roster for a given CVS file.  It will make one roster for each CVS file in the given roster directory.  It will then process the LateX files and create a PDF file for each roster.  These PDF files can then be printed and used for photos.
+This repository contains two Python scripts:
 
-## Create Rosters Usage
+1. `export_csv_from_excel.py`: This script takes an Excel file as input and exports each sheet as a CSV file.
+2. `csv_to_latex_pdf.py`: This script creates LaTeX files from a given CSV file directory and a LaTeX template file, and then processes them into PDF files.
 
-    ./create_rosters.sh roster_dir <LaTeX template file>
-    The path to the LaTeX template file is optional.  If not given, the default template file will be used.
+## export_csv_from_excel.py
 
-### Rosters Output
+This script reads an Excel file, cleaning and exporting each sheet to a CSV file. 
 
-In a latex directory, there will be a tex file for each roster file in the roster directory.  There will also be a PDF file for each roster file in the roster directory.
+### Requirements
+
+* Python 3.9
+* openpyxl, CSV
+
+### Usage
+
+To run the script, use the following command:
+
+```bash
+python3.9 export_csv_from_excel.py <filename> [--by-team]
+```
+    <filename>: Name of the Excel file to export.
+    --by-team: Optional flag. If set, the script will export by team. Otherwise, it will export by workbook.
+
+The script will create a csv directory in the current working directory, where it will save the generated CSV files. It prints the total player count after processing all workbooks.
+
+There will also be a PDF file for each roster file in the roster directory.
 
 Find example of the CSV file in the Example directory.
 
@@ -19,23 +36,31 @@ Find example of the CSV file in the Example directory.
 
 * [PDF file -- 12U_black.pdf](./Examples/latex/12U_Black.pdf)
 
-## Create CSV Files Usage
+## csv_to_latex_pdf.py
+This script creates LaTeX files from a given CSV file directory and a LaTeX template file, then processes them into PDF files.
 
-    ./create_csv_from_excel.py excel_file
+### Requirements
+* Python 3.9
+* LaTeX (pdflatex)
 
-### CSV Output
+### Usage
+To run the script, use the following command:
 
-In a CSV directory, there will be a CSV file for each roster for each sheet in the excel file.
+```bash
+Copy code
+python3 csv_to_latex_pdf.py <csv_dir> [template_file.tex]
+```
 
-## Requirements
+    <csv_dir>: Path to the directory that contains the CSV files.
+    template_file.tex: Optional LaTeX template file. If not provided, the script will use RosterTemplate.tex by default.
 
-* Python 3 installed
-* Python 3 modules installed: CSV, openpyxl
-* TeXLive installed
-* Path for pdflatex installed if not in the default path
-* Individual roster files in CVS format in the roster directory
-* Roster files must include, First Name, Last Name, Sweater Number, and Team Name
+The script will create a latex directory in the current working directory, where it will save the generated LaTeX and PDF files.
 
-## License
+Installation of Dependencies
+To install the dependencies, you need to have Python installed on your system. If you don't, you can download it from the official Python website.
 
-This script is licensed under the MIT license.  See the LICENSE file for more information.
+Once Python is installed, you can install the openpyxl library using pip:
+
+pip install openpyxl
+
+LaTeX needs to be installed separately. You can download it from the official LaTeX Project website.
