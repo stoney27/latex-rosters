@@ -59,7 +59,8 @@ def export_by_workbook(filename):
     
     # Open the Excel file
     wb = openpyxl.load_workbook(filename)
-
+    
+    player_count = 0
     # Iterate through each sheet in the workbook
     for sheet in wb:
         # Get the first row (which should contain the headers)
@@ -85,7 +86,6 @@ def export_by_workbook(filename):
             # Iterate through the rest of the rows in the sheet and write them to the CSV file
             for row in sheet.iter_rows(min_row=2, values_only=True):  # start from the second row to skip the header
                 writer.writerow(row)
-                player_count += 1
 
 def export_by_team(filename):
     global player_count
@@ -93,6 +93,7 @@ def export_by_team(filename):
     # Open the Excel file
     wb = openpyxl.load_workbook(filename)
 
+    player_count = 0
     # Iterate through each sheet in the workbook
     for sheet in wb:
         # Get the first row (which should contain the headers)
@@ -140,7 +141,7 @@ def export_by_team(filename):
                 writer.writerow(headers)  # write the headers to the CSV file
 
                 last_team_name = team_name
-
+                
             cleaned_row = clean_row(row, headers)
             writer.writerow(cleaned_row)  # write the row to the CSV file
 
@@ -148,6 +149,8 @@ def export_by_team(filename):
             csv_file.close()  # close the last CSV file
 
 def main():
+    global player_count
+    
     # Command line argument parsing
     parser = argparse.ArgumentParser(description='Export Excel file to CSV.')
     parser.add_argument('filename', help='Name of the Excel file to export.')
