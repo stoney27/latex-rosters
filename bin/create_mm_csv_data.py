@@ -35,6 +35,11 @@ def find_team_photo(photo_list):
 
     return(None)
 
+def create_mm_csv_path(directory, filename):
+    '''Creates the new csv file path'''
+    newfile = os.path.splitext(os.path.basename(filename))[0] + "_mm.csv"
+    return directory + '/' + newfile
+
 #--------------------------------------------------------------
 
 if len(sys.argv) != 4:
@@ -62,11 +67,8 @@ print("Team photo: {}".format(team_photo))
 #
 player_data = csv.DictReader(open(filename))
 field_names = player_data.fieldnames
-
-newfile = os.path.splitext(os.path.basename(filename))[0] + "_mm.csv"
 csv_file_path = os.path.dirname(filename)
-
-new_csv_file = csv_file_path + '/' + newfile
+new_csv_file = create_mm_csv_path(path, filename)
 
 with open(new_csv_file, "w") as new_csv:
 
@@ -89,6 +91,10 @@ with open(new_csv_file, "w") as new_csv:
     for row in player_data:
         row["Teamname"] = team_name
 
+        # Clean up any blank spaces in Lastname or Firstname
+        row["Lastname"] = row["Lastname"].strip()
+        row["Firstname"] = row["Firstname"].strip()
+        
         # look for player photos:
         for player in file_names:
             if row["Lastname"] in player and row["Firstname"] in player:

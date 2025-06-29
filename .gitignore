@@ -1,8 +1,16 @@
-latex
-csv
+output/
+data/
 latex_logfile.log
 *.aux
 *.log
 
 !Examples/csv
 !Examples/latex
+
+.DS_Store
+*.pyc
+*.pyo
+*.pyd
+
+test-templates/
+test.xlsx
