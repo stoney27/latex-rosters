@@ -64,6 +64,10 @@ def clean_sweater_number(sweater_number):
 def clean_row(row, headers):
     global player_count
 
+    # Skip completely empty rows
+    if not row or all(cell is None or str(cell).strip() == "" for cell in row):
+        return None
+
     firstname_index = headers.index(HEADER_FIRSTNAME)
     lastname_index = headers.index(HEADER_LASTNAME)
     sweater_index = headers.index(HEADER_SWEATER)
@@ -121,7 +125,8 @@ def export_by_workbook(filename):
             # Iterate through the rest of the rows in the sheet and write them to the CSV file
             for row in sheet.iter_rows(min_row=2, values_only=True):  # start from the second row to skip the header
                 cleaned_row = clean_row(row, headers)
-                writer.writerow(cleaned_row)
+                if cleaned_row is not None:
+                    writer.writerow(cleaned_row)
 
 def get_headers(sheet):
     """Get the headers from the first row of the sheet."""
@@ -168,7 +173,7 @@ def export_by_team(filename):
         # Iterate through the rest of the rows in the sheet
         for row in sheet.iter_rows(min_row=2, values_only=True):  # start from the second row to skip the header
             # if the row is empty, skip it
-            if row[team_index] is None:
+            if row[team_index] is None or all(cell is None or str(cell).strip() == "" for cell in row):
                 continue
 
             team_name = row[team_index]
@@ -185,10 +190,12 @@ def export_by_team(filename):
                 csv_file, writer = create_csv_writer(team_name, headers)
 
                 last_team_name = team_name
+                team_player_count = 0
                 
             cleaned_row = clean_row(row, headers)
-            writer.writerow(cleaned_row)  # write the row to the CSV file
-            team_player_count += 1 
+            if cleaned_row is not None:
+                writer.writerow(cleaned_row)  # write the row to the CSV file
+                team_player_count += 1 
 
         if csv_file is not None:
             csv_file.close()  # close the last CSV file

@@ -1,11 +1,20 @@
-# !/usr/bin/env python3.9
-# Tests for export_csv_from_excel
+# !/usr/bin/env python3
+# Tests for 1_export_csv_from_excel
 #
 import pytest
-import export_csv_from_excel
+import sys
 import csv
 import os
 import pandas as pd
+import tempfile
+import shutil
+import importlib.util
+
+# Import the script using importlib since it starts with a number
+script_path = os.path.join(os.path.dirname(__file__), '..', '1_export_csv_from_excel.py')
+spec = importlib.util.spec_from_file_location("export_csv_from_excel", script_path)
+export_csv_from_excel = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(export_csv_from_excel)
 
 # Create workbook test data
 def create_test_workbook():
@@ -23,7 +32,11 @@ def create_test_workbook():
         ['Mason', 'Stonefield', '70', '16U AAA'],
         ]
 
-    headers = ['Firstname', 'Lastname', 'Sweater', 'Team']
+    # Use the header names that the script expects
+    headers = [export_csv_from_excel.HEADER_FIRSTNAME, 
+               export_csv_from_excel.HEADER_LASTNAME, 
+               export_csv_from_excel.HEADER_SWEATER, 
+               export_csv_from_excel.HEADER_TEAM]
     # Write out rows to a excel file for testing
     df1 = pd.DataFrame(team1, columns=headers)
     df2 = pd.DataFrame(team2, columns=headers)
@@ -53,7 +66,11 @@ def create_team_test_data():
         ['Cameron', 'Stonefield', '50', 'Squirt A'],
     ]
 
-    headers = ['Firstname', 'Lastname', 'Sweater', 'Team']
+    # Use the header names that the script expects
+    headers = [export_csv_from_excel.HEADER_FIRSTNAME, 
+               export_csv_from_excel.HEADER_LASTNAME, 
+               export_csv_from_excel.HEADER_SWEATER, 
+               export_csv_from_excel.HEADER_TEAM]
     
     # Write out rows to a excel file for testing
     df = pd.DataFrame(rows, columns=headers)
@@ -63,23 +80,21 @@ def create_team_test_data():
     writer.close()
 
 # Cleanup the test files
-def cleanup_test_data():
+def cleanup_test_data(test_dir=None):
     # Remove the test file
     if os.path.exists('test.xlsx'):
         os.remove('test.xlsx')
     if os.path.exists('test.csv'):
         os.remove('test.csv')
-    if os.path.exists('csv/Bantam_AAA.csv'):
-        os.remove('csv/Bantam_AAA.csv')
-    if os.path.exists('csv/16U_AAA.csv'):
-        os.remove('csv/16U_AAA.csv')
-    if os.path.exists('csv/Squirt_A.csv'):
-        os.remove('csv/Squirt_A.csv')
+    # Clean up test directory if provided
+    if test_dir and os.path.exists(test_dir):
+        shutil.rmtree(test_dir, ignore_errors=True)
 
 # Test the clean_row function
 def test_clean_row():
-    # Test empty first name
-    headers = ['Firstname', 'Lastname', 'Sweater', 'Team']
+    # Test sweater number cleaning
+    headers = [export_csv_from_excel.HEADER_FIRSTNAME, export_csv_from_excel.HEADER_LASTNAME, 
+               export_csv_from_excel.HEADER_SWEATER, export_csv_from_excel.HEADER_TEAM]
     row = ['Ian', 'Stoney', '$@#00', 'Bantam AAA']
     assert export_csv_from_excel.clean_row(row, headers) == ['Ian', 'Stoney', '00', 'Bantam AAA']
     
@@ -88,47 +103,65 @@ def test_clean_row():
     
 # test the player count funcionality by passing in a list of rows
 def test_player_count():
+    # Reset player count
+    export_csv_from_excel.player_count = 0
+    
     create_team_test_data()
     
-    export_csv_from_excel.export_by_team('test.xlsx')
+    # Create temporary test directory
+    test_csv_dir = tempfile.mkdtemp(prefix='test_csv_')
+    
+    export_csv_from_excel.export_by_team('test.xlsx', test_csv_dir)
     
     assert export_csv_from_excel.player_count == 14
     
-    cleanup_test_data()
+    cleanup_test_data(test_csv_dir)
     
 # Test the export_by_workbook function
 def test_by_workbook():
+    # Reset player count
+    export_csv_from_excel.player_count = 0
+    
     create_test_workbook()
     
-    export_csv_from_excel.export_by_workbook('test.xlsx')
+    # Create temporary test directory
+    test_csv_dir = tempfile.mkdtemp(prefix='test_csv_')
     
-    assert os.path.exists('csv/Bantam_AAA.csv')
-    assert os.path.exists('csv/16U_AAA.csv')
+    export_csv_from_excel.export_by_workbook('test.xlsx', test_csv_dir)
+    
+    assert os.path.exists(os.path.join(test_csv_dir, 'Bantam_AAA.csv'))
+    assert os.path.exists(os.path.join(test_csv_dir, '16U_AAA.csv'))
     
     # Read the csv file and check the contents
-    with open('csv/Bantam_AAA.csv', newline='') as csvfile:
+    with open(os.path.join(test_csv_dir, 'Bantam_AAA.csv'), newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         row_count = 0
         for row in reader:
             row_count += 1
         assert row_count == 5
 
-    cleanup_test_data()
+    cleanup_test_data(test_csv_dir)
     
 # Test the export_by_team function
 def test_by_team():
+    # Reset player count
+    export_csv_from_excel.player_count = 0
+    
     create_team_test_data()
     
-    export_csv_from_excel.export_by_team('test.xlsx')
+    # Create temporary test directory
+    test_csv_dir = tempfile.mkdtemp(prefix='test_csv_')
     
-    assert os.path.exists('csv/Squirt_A.csv')
+    export_csv_from_excel.export_by_team('test.xlsx', test_csv_dir)
+    
+    assert os.path.exists(os.path.join(test_csv_dir, 'Squirt_A.csv'))
     
     # Read the csv file and check the contents
-    with open('csv/Squirt_A.csv', newline='') as csvfile:
+    with open(os.path.join(test_csv_dir, 'Squirt_A.csv'), newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         row_count = 0
         for row in reader:
             row_count += 1
         assert row_count == 7
 
-    cleanup_test_data()
+    cleanup_test_data(test_csv_dir)

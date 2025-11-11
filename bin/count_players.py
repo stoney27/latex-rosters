@@ -1,4 +1,10 @@
 #! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# UTILITY: Count players per team for billing and verification
+# Reads from: seasons/YYYY-YY/output/csv/
+# Outputs to: seasons/YYYY-YY/output/reports/player_count.csv
+#
 import csv
 import os
 import sys
@@ -34,18 +40,38 @@ def main(directory):
             cleaned_file_name = format_filename(file_name)
             output_data.append((cleaned_file_name, num_lines))
 
+    # Determine output path based on input directory
+    if 'seasons' in directory:
+        # Extract season from path and save to reports directory
+        parts = directory.split(os.sep)
+        season_idx = parts.index('seasons') + 1
+        season = parts[season_idx]
+        output_dir = os.path.join(os.sep.join(parts[:season_idx+1]), 'output', 'reports')
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        output_file = os.path.join(output_dir, 'player_count.csv')
+    else:
+        # Fallback to current directory
+        output_file = "player_count.csv"
+
     # Write the results to a new CSV file
-    with open("per_team_count.csv", 'w', newline='') as outfile:
+    with open(output_file, 'w', newline='') as outfile:
         writer = csv.writer(outfile)
-        writer.writerow(["Team Name", "Number of Plalyers"])
+        writer.writerow(["Team Name", "Number of Players"])
         writer.writerows(output_data)
 
-    print("Done! Check the file per_team_count.csv for results.")
+    print(f"Done! Player count report saved to: {output_file}")
+    
+    # Print summary
+    total_players = sum(count for _, count in output_data)
+    print(f"\nTotal teams: {len(output_data)}")
+    print(f"Total players: {total_players}")
 
 if __name__ == "__main__":
     # Get the directory path from the command line
     if len(sys.argv) < 2:
-        print("Please provide a directory path.")
+        print("Usage: python3 bin/count_players.py <csv_directory>")
+        print("Example: python3 bin/count_players.py seasons/2025-26/output/csv")
         sys.exit(1)
     dir_path = sys.argv[1]
     main(dir_path)

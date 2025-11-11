@@ -1,16 +1,33 @@
+# Generated outputs and data files
 output/
-data/
+*.csv
 latex_logfile.log
 *.aux
 *.log
+*.pdf
+*.synctex.gz
 
+# Season-specific data (not version controlled)
+seasons/
+
+# Legacy data directories (if still present)
+data/
+csv/
+
+# Keep example files for documentation
 !Examples/csv
 !Examples/latex
+!config/*.csv
 
+# System files
 .DS_Store
+
+# Python
 *.pyc
 *.pyo
 *.pyd
+__pycache__/
 
+# Testing artifacts
 test-templates/
 test.xlsx
