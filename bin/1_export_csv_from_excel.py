@@ -117,53 +117,100 @@ def clean_row(row, headers):
     player_count += 1
     return row
 
-def export_by_workbook(filename, csv_dir):
-    global player_count
-    
-    # Open the Excel file
-    wb = openpyxl.load_workbook(filename)
-    
-    player_count = 0
-    # Iterate through each sheet in the workbook
-    for sheet in wb:
-        # Get the first row (which should contain the headers)
-        headers = [cell.value for cell in next(sheet.rows)]
 
-        # Check if the required headers are present
-        if not all(header in headers for header in header_mapping.keys()):
-            print(f"Error: Required headers not found in sheet '{sheet.title}'")
-            continue
-        
-        # If sheet.title has a space in the name, replace it with an underscore
-        sheet.title = sheet.title.replace(' ', '_')
-        
-        # replace any characters that are not allowed in a filename with an underscore
-        sheet.title = ''.join(c if c.isalnum() else '_' for c in sheet.title)
-        
-        # Create a CSV file for the sheet
-        with open(f'{csv_dir}/{sheet.title}.csv', 'w', newline='') as csv_file:
-            # Create a CSV writer
-            writer = csv.writer(csv_file)
-            # Write the mapped headers to the CSV file
-            writer.writerow([header_mapping[header] for header in headers])
-            # Iterate through the rest of the rows in the sheet and write them to the CSV file
-            for row in sheet.iter_rows(min_row=2, values_only=True):  # start from the second row to skip the header
-                cleaned_row = clean_row(row, headers)
-                if cleaned_row is not None:
-                    writer.writerow(cleaned_row)
+def sanitize_filename(name):
+    """Sanitize a filename by replacing invalid characters and spaces."""
+    if not name:
+        return ''
+    file_name = str(name).replace(' ', '_')
+    return ''.join(c if c.isalnum() else '_' for c in file_name)
+
+
+def is_valid_roster_headers(headers):
+    return all(header in headers for header in header_mapping.keys())
+
 
 def get_headers(sheet):
     """Get the headers from the first row of the sheet."""
     return [cell.value for cell in next(sheet.rows)]
 
+
+def get_sheet_team_names(sheet, headers, max_rows=1000):
+    """Return a set of distinct team names found in the sheet."""
+    team_index = headers.index(HEADER_TEAM)
+    team_names = set()
+    row_count = 0
+
+    for row in sheet.iter_rows(min_row=2, values_only=True):
+        if row is None or all(cell is None or str(cell).strip() == '' for cell in row):
+            continue
+
+        team_name = row[team_index]
+        if team_name is not None and str(team_name).strip() != '':
+            team_names.add(str(team_name).strip())
+            if len(team_names) > 1:
+                break
+
+        row_count += 1
+        if row_count >= max_rows:
+            break
+
+    return team_names
+
+
+def detect_export_mode(filename):
+    """Detect whether the workbook should be exported by workbook or by team."""
+    wb = openpyxl.load_workbook(filename, data_only=True)
+    valid_sheets = []
+    multi_team_sheet_found = False
+
+    for sheet in wb:
+        try:
+            headers = get_headers(sheet)
+        except StopIteration:
+            continue
+
+        if not is_valid_roster_headers(headers):
+            continue
+
+        valid_sheets.append(sheet)
+        if len(get_sheet_team_names(sheet, headers)) > 1:
+            multi_team_sheet_found = True
+            break
+
+    if multi_team_sheet_found or len(valid_sheets) == 1:
+        return 'team'
+    return 'workbook'
+
+
+def export_by_workbook(filename, csv_dir):
+    global player_count
+
+    wb = openpyxl.load_workbook(filename, data_only=True)
+    player_count = 0
+
+    for sheet in wb:
+        headers = get_headers(sheet)
+        if not is_valid_roster_headers(headers):
+            print(f"Error: Required headers not found in sheet '{sheet.title}'")
+            print(f"Found headers:    {headers}")
+            print(f"Required headers: {list(header_mapping.keys())}")
+            continue
+
+        file_name = sanitize_filename(sheet.title)
+        with open(f'{csv_dir}/{file_name}.csv', 'w', newline='') as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerow([header_mapping[header] for header in headers])
+
+            for row in sheet.iter_rows(min_row=2, values_only=True):
+                cleaned_row = clean_row(row, headers)
+                if cleaned_row is not None:
+                    writer.writerow(cleaned_row)
+
+
 def create_csv_writer(team_name, headers, csv_dir):
     """Create a new CSV writer for a team."""
-    # replace any blank spaces from the team name with an underscore
-    file_name = team_name.replace(' ', '_') if team_name else ""
-    # replace any characters that are not allowed in a filename with an underscore
-    file_name = ''.join(c if c.isalnum() else '_' for c in file_name)
-    
-    # create a new CSV file and writer
+    file_name = sanitize_filename(team_name)
     csv_file = open(f'{csv_dir}/{file_name}.csv', 'w', newline='')
     writer = csv.writer(csv_file)
     writer.writerow([header_mapping[header] for header in headers])  # write the mapped headers to the CSV file
@@ -172,73 +219,70 @@ def create_csv_writer(team_name, headers, csv_dir):
 
 def export_by_team(filename, csv_dir):
     global player_count
-    
-    # Open the Excel file
-    wb = openpyxl.load_workbook(filename)
 
+    wb = openpyxl.load_workbook(filename, data_only=True)
     player_count = 0
-    # Iterate through each sheet in the workbook
+    writers = {}
+    team_counts = {}
+
     for sheet in wb:
         headers = get_headers(sheet)
-
-        # Check if the required headers are present
-        if not all(header in headers for header in header_mapping.keys()):
+        if not is_valid_roster_headers(headers):
             print(f"Error: Required headers not found in sheet '{sheet.title}'")
+            print(f"Found headers:    {headers}")
+            print(f"Required headers: {list(header_mapping.keys())}")
             continue
 
-        # Adjust column indices based on your header structure
         team_index = headers.index(HEADER_TEAM)
-        
-        last_team_name = None
-        csv_file = None
-        writer = None
-        team_player_count = 0
 
-        # Iterate through the rest of the rows in the sheet
-        for row in sheet.iter_rows(min_row=2, values_only=True):  # start from the second row to skip the header
-            # if the row is empty, skip it
-            if row[team_index] is None or all(cell is None or str(cell).strip() == "" for cell in row):
+        for row in sheet.iter_rows(min_row=2, values_only=True):
+            if row is None or all(cell is None or str(cell).strip() == '' for cell in row):
                 continue
 
             team_name = row[team_index]
-                
-            # If team name changes or is the first row, create a new CSV writer
-            if team_name != last_team_name:
-                if csv_file is not None:  # if not the first row
-                    csv_file.close()  # close the last CSV file
-                    if team_player_count < 10:  # if the last team had less than 10 players
-                        print(f"Alert: Team {last_team_name} has less than 10 players!")
+            if team_name is None or str(team_name).strip() == '':
+                continue
 
-                print(f"Team:", team_name)
-                
-                csv_file, writer = create_csv_writer(team_name, headers, csv_dir)
-
-                last_team_name = team_name
-                team_player_count = 0
-                
+            team_name = str(team_name).strip()
             cleaned_row = clean_row(row, headers)
-            if cleaned_row is not None:
-                writer.writerow(cleaned_row)  # write the row to the CSV file
-                team_player_count += 1 
+            if cleaned_row is None:
+                continue
 
-        if csv_file is not None:
-            csv_file.close()  # close the last CSV file
-            if team_player_count < 10:  # if the last team had less than 10 players
-                print(f"Alert: Team {last_team_name} has less than 10 players!")
+            file_name = sanitize_filename(team_name)
+            if file_name not in writers:
+                csv_file, writer = create_csv_writer(team_name, headers, csv_dir)
+                writers[file_name] = (csv_file, writer)
+                team_counts[file_name] = 0
+                print(f"Team: {team_name}")
+            else:
+                csv_file, writer = writers[file_name]
+
+            writer.writerow(cleaned_row)
+            team_counts[file_name] += 1
+
+    for file_name, (csv_file, _) in writers.items():
+        csv_file.close()
+        if team_counts[file_name] < 10:
+            print(f"Alert: Team {file_name} has less than 10 players!")
 
 def main():
     global player_count
-    
+
     # Command line argument parsing
     parser = argparse.ArgumentParser(
         description='STEP 1: Export Excel roster file to CSV files (one per team).',
         epilog='Example: python3 bin/1_export_csv_from_excel.py seasons/2025-26/input/rosters.xlsx'
     )
     parser.add_argument('filename', help='Path to the Excel file to export (e.g., seasons/2025-26/input/rosters.xlsx)')
-    parser.add_argument('--by-team', action='store_true', help='If set, export by team. Otherwise, export by workbook.')
+    parser.add_argument('--by-team', action='store_true', help='Force export by team.')
+    parser.add_argument('--by-workbook', action='store_true', help='Force export by workbook.')
     parser.add_argument('--season', help='Season year (e.g., 2025-26). If not provided, current season is auto-detected.')
 
     args = parser.parse_args()
+
+    if args.by_team and args.by_workbook:
+        print('Error: --by-team and --by-workbook cannot be used together.')
+        sys.exit(1)
 
     # Get the CSV output directory
     csv_dir = get_csv_output_dir(args.season)
@@ -250,6 +294,14 @@ def main():
         sys.exit(1)
 
     if args.by_team:
+        mode = 'team'
+    elif args.by_workbook:
+        mode = 'workbook'
+    else:
+        mode = detect_export_mode(args.filename)
+        print(f"Auto-detected export mode: {mode}")
+
+    if mode == 'team':
         export_by_team(args.filename, csv_dir)
     else:
         export_by_workbook(args.filename, csv_dir)
@@ -257,6 +309,6 @@ def main():
     # Print total player count after processing all workbooks
     print(f'\nTotal players: {player_count}')
     print(f'CSV files saved to: {csv_dir}')
-    
+
 if __name__ == '__main__':
     main()
